@@ -1,0 +1,5 @@
+*.fasl
+*.*~
+*.info
+doc/html/
+TAGS

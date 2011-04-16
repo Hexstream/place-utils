@@ -1,0 +1,812 @@
+\input texinfo   @c -*-texinfo-*-
+@c %**start of header
+@setfilename place-utils.info
+@settitle Place-utils Manual
+@allowcodebreaks false
+@syncodeindex fn cp
+@c %**end of header
+
+@copying
+This manual documents place-utils, which is a Common Lisp library that
+provides a few utilities relating to setfable places.
+
+@noindent The project's home is @uref{http://www.hexstreamsoft.com/projects/place-utils}.
+
+@noindent Originally authored by Jean-Philippe Paradis <hexstream@@gmail.com>.
+
+@noindent This project is in the public domain.
+@* See the Unlicense appendix for details.
+@end copying
+
+@c Title page should go here,
+@c but I support only Info and HTML output at this time.
+
+@ifnottex
+@node Top
+@top Place-utils Manual
+
+@insertcopying
+
+@menu
+* Reference::    Detailed descriptions of the semantics of the provided utilities.
+
+* Unlicense::    Place-utils and its manual are in the public domain.
+
+@c * Index::        An entry for each Concept, Function and Macro.
+
+@detailmenu
+ --- The Detailed Node Listing ---
+
+Place-utils Reference
+
+* Quick Reference::       A table with a small description of each symbol exported by place-utils.
+
+* SETF-EXPANDERLET::      Introduce local setf-expanders.
+* WITH-RESOLVED-PLACES::  Evaluate subforms once, then access repeatedly safely.
+
+* UPDATEF::               Like @code{setf}, except supply update functions instead of new values.
+* BULKF::                 Flexible mass updating of places.
+* FUNCALLF/APPLYF::       Store into a place the result of calling a function with
+                          its old value, possibly with further arguments.
+
+@c * PROXYF::                Customize the behavior of a place.
+* CACHEF::                Compute the value of a place only when it's first read.
+* OLDF::                  Make the storing form of a place return old value(s) instead of new ones.
+* READF::                 Easily make a place work in non-place contexts.
+* TRACEF::                Output debug info when a particular place is accessed.
+
+@end detailmenu
+@end menu
+
+@end ifnottex
+
+@node Reference
+@chapter Place-utils Reference
+
+A good understanding of places, also known as generalized references,
+should prove invaluable in understanding this material.
+
+@noindent @uref{http://www.lispworks.com/documentation/HyperSpec/Body/05_a.htm, CLHS 5.1 Generalized Reference}
+
+@menu
+* Quick Reference::       A table with a small description of each symbol exported by place-utils.
+
+* SETF-EXPANDERLET::      Introduce local setf-expanders.
+* WITH-RESOLVED-PLACES::  Evaluate subforms once, then access repeatedly safely.
+
+* UPDATEF::               Like @code{setf}, except supply update functions instead of new values.
+* BULKF::                 Flexible mass updating of places.
+* FUNCALLF/APPLYF::       Store into a place the result of calling a function with
+                          its old value, possibly with further arguments.
+
+@c * PROXYF::                Customize the behavior of a place.
+* CACHEF::                Compute the value of a place only when it's first read.
+* OLDF::                  Make the storing form of a place return old value(s) instead of new ones.
+* READF::                 Easily make a place work in non-place contexts.
+* TRACEF::                Output debug info when a particular place is accessed.
+@end menu
+
+
+@node Quick Reference
+@section Quick Reference
+Here are all the symbols exported by place-utils.
+
+@multitable {Accessor Modif} {@code{with-resolved-places}} {Output debug information when a particular place is accessed.}
+@headitem Type @tab Symbol @tab Description
+@item Macro @tab @code{setf-expanderlet} @tab Introduce local setf-expanders.
+@item
+@item Macro @tab @code{with-resolved-places} @tab Evaluate subforms once, then access repeatedly safely.
+@item
+@item
+@item Modify Macro @tab @code{updatef} @tab Like @code{setf}, except supply update functions@*(to be called with old values) instead of new values.
+@item
+@item Modify Macro @tab @code{bulkf} @tab Flexible mass updating of places.@*An update function receives the old values as arguments@*and returns the values to write back as multiple values.
+@item
+@item Modify Macro @tab @code{funcallf} @tab Store into a place the result of calling@*an update function with the old value of the place,@*possibly along with additional regular arguments.
+@item Modify Macro @tab @code{applyf} @tab Same as @code{funcallf} except @code{apply} is used.
+@item
+@item
+@c @item Accessor Modif @tab @code{proxyf} @tab Customize the behavior of a place.
+@c @item Function @tab @code{call-next-customizer} @tab Use in @code{proxyf} around customizers.
+@item Accessor Modif @tab @code{cachef} @tab Compute the value of a place only when it's first read.
+@item Accessor Modif @tab @code{oldf} @tab Make the storing form of a place return old value(s).
+@item Accessor Modif @tab @code{readf} @tab Easily make a place work in non-place contexts.
+@item Accessor Modif @tab @code{tracef} @tab Output debug info when a particular place is accessed.
+@end multitable
+
+@noindent In this documentation, the term ``Modify Macro'' is used in a more
+general sense than traditional modify macros that have restrictions
+such as accepting only one place and then only as the first argument.
+
+@noindent An ``Accessor Modif[ier]'' is a place that:
+
+@enumerate
+@item is implemented as a macro;
+@item takes at least one place as argument;
+@item returns the setf-expander of this (these) inner place(s) with some modifications.
+@end enumerate
+
+
+@node SETF-EXPANDERLET
+@section @code{setf-expanderlet}
+
+@defmac setf-expanderlet (&rest bindings) &body body @result{} results
+@code{setf-expanderlet} introduces local setf-expanders. This opens
+possibilities for more complex local setf-expanders than can be
+handled by Common Lisp's built-in support for local @code{setf}
+functions (which must evaluate all their arguments once from left to
+right and can only accept one new value at a time).
+
+@code{setf-expanderlet} is to @code{define-setf-expander} as
+@code{macrolet} is to @code{defmacro}. The @var{bindings} of
+@code{setf-expanderlet} have much the same semantics as their
+counterparts in @code{macrolet}, except the job of each expander is to
+return a @code{setf} expansion (5 values), not a normal expansion (a
+form).
+
+@uref{http://www.lispworks.com/documentation/HyperSpec/Body/05_aab.htm, CLHS 5.1.1.2 Setf Expansions}
+
+@uref{http://www.lispworks.com/documentation/HyperSpec/Body/m_defi_3.htm, CLHS @code{define-setf-expander}}
+
+@uref{http://www.lispworks.com/documentation/HyperSpec/Body/s_flet_.htm, CLHS @code{macrolet}}
+
+@uref{http://www.lispworks.com/documentation/HyperSpec/Body/m_defmac.htm, CLHS @code{defmacro}}
+
+As an example of what @code{setf-expanderlet} can let one accomplish,
+@code{with-resolved-places} is trivially implemented in terms of it.
+
+@strong{Implementation note:} Surprisingly enough, this implementation
+of @code{setf-expanderlet} is written fully portably. As far as I can
+tell, the only caveat is that the name of the local setf-expander is
+unconditionally made a local macro. This macro, if used in a non-place
+context, simply expands to a form that evaluates the subforms and then
+reads the place.
+
+In contrast, ``real'' setf-expanders as defined by
+@code{define-setf-expander} don't affect the semantics of the operator
+in non-place contexts, which is useful if the operator is a
+function. However, if the original operator is simple enough that it's
+implemented as a function, you can probably just use a local setf
+function anyway so I don't think the aforementioned caveat is very
+important.
+@end defmac
+
+
+@node WITH-RESOLVED-PLACES
+@section @code{with-resolved-places}
+
+@defmac with-resolved-places (&rest bindings) &body body @result{} results
+Each @var{binding} is of the form @code{(@var{resolved-place}
+@var{unresolved-place})}.
+
+At the time @code{with-resolved-places} is entered, the subforms of
+each @var{unresolved-place} are evaluated and bound to their temporary
+variables. Within @var{body} (an implicit @code{progn}), each
+@var{resolved-place} can be used to access (read and/or write) the
+corresponding @var{unresolved-place}, perhaps repeatedly, without
+evaluating the subforms again.
+
+@lisp
+(let* ((my-list (list 0 1 2))
+       (my-other-list my-list))
+  (with-resolved-places ((second (second (princ my-list))))
+    (setf my-list nil second 8)
+    (incf second 2)
+    (list my-list my-other-list second)))
+@print{} (0 1 2)
+@result{} (NIL (0 10 2) 10)
+@end lisp
+
+@uref{http://www.lispworks.com/documentation/HyperSpec/Body/05_aaa.htm, CLHS 5.1.1.1 Evaluation of Subforms to Places}
+
+In the absence of @code{with-resolved-places}, in situations where
+multiple evaluation of subforms for different accesses is not desirable,
+one would traditionally bind the results of the evaluation of the
+troublesome subforms (with @code{let} or @code{let*}) in an ad-hoc way
+on an as-needed basis, manually replicating part of the job of
+setf-expanders.
+@end defmac
+
+
+@node UPDATEF
+@section @code{updatef}
+
+@deffn {Modify Macro} updatef &rest places-and-update-functions @result{} results
+@code{updatef} is exactly like @code{setf}, except that instead of
+directly providing new values to store into the place, one provides
+update functions that will be called with the corresponding old
+value. Each store variable is bound to the result of calling the
+corresponding update function with the old value, then the storing
+form is evaluated.
+
+@lisp
+(defun double (number) (* number 2))
+
+(let ((a 2) (b 8))
+  (updatef (values a b) #'double)
+  (values a b))
+@result{} 4, NIL
+
+(let ((a 2) (b 8))
+  (updatef a #'1+
+           a #'double
+           b #'-)
+  (values a b))
+@result{} 6, -8
+
+(let ((a #(1 2)))
+  (updatef (aref (print a) (print 1))
+           (print #'double))
+  a)
+@print{} #(1 2)
+@print{} 1
+@print{} #<FUNCTION DOUBLE> 
+@result{} #(1 4)
+@end lisp
+@end deffn
+
+
+@node BULKF
+@section @code{bulkf}
+
+@deffn {Modify Macro} bulkf update-function-form@
+&rest mode-markers-and-items @result{} results
+@code{bulkf} allows mass updating of places.
+
+@var{update-function-form} is evaluated first to produce
+@var{update-function}. The arguments and return values of this
+function depend on @var{mode-markers-and-items} and are described
+below.
+
+@var{mode-markers-and-items} is a list of @var{mode-markers} and
+@var{items} to be processed from left to right at
+macroexpansion-time. A @var{mode-marker} is one of the symbols
+@code{:access}, @code{:read}, @code{:write} or @code{:pass}. Any other
+form is an @var{item}. Whenever a @var{mode-marker} is encountered,
+the mode with that name becomes the current mode and remains so until
+the next @var{mode-marker}. The current mode at the start of
+@var{mode-markers-and-items} is @code{:access} mode. There are 4
+different types of @var{items}, corresponding to the 4 different modes
+that can be the current mode at the time the @var{item} is
+encountered. Here are the semantics of each type of item:
+
+@table @code
+@item :access
+@var{item} is a place that will be both read from and written to. At
+runtime, the subforms of the place are evaluated and the place is
+read. The primary value is contributed as an additional argument to
+@var{update-function}. @var{update-function} also returns an
+additional value that will be written back into the place (reusing the
+temporary variables bound to the results of the subforms).
+@item :read
+@var{item} is a place that will be read from. At runtime, the subforms
+of the place are evaluated and the place is read. The primary value is
+contributed as an additional argument to @var{update-function}.
+@item :write
+@var{item} is a place that will be written to. @var{update-function}
+returns an additional value that will be written into the place. The
+evaluation of the subforms of the place happens at the same time as it
+would have happened if the place had been read from.
+@item :pass
+@var{item} is a form to be evaluated normally. Its primary value is
+passed as an additional argument to @var{update-function}.
+@end table
+
+If @var{update-function} returns more values than there are places to
+write to (@code{:access} and @code{:write} @var{items}), the
+additional values are ignored. If it returns less values than there
+are of these places, the remaining ones are set to
+@code{nil}. @code{bulkf} returns the values that were written into
+these places. This might be more or less values than were returned by
+@var{update-function}. If a place to be written to has more than one
+store variable, the remaining such variables are set to @code{nil}
+prior to evaluation of the storing form.
+
+@code{bulkf} accepts an optional unevaluated argument before
+@var{update-function-form} (as very first argument). This must be the
+symbol @var{funcall} or @var{apply} and determines which operator will
+be used to call the @var{update-function} with its arguments. The
+default is @code{funcall}, which is expected to be used an
+overwhelming majority of the time. This is the reason this argument
+has not been made a normal required parameter.
+
+@code{bulkf} is very versatile and can be used to easily implement
+many different types of modify macros. Here are just a few examples:
+
+@lisp
+(defun bulkf-transfer (quantity source destination)
+  (values (- source quantity)
+          (+ destination quantity)))
+
+(defmacro transferf (quantity source destination)
+  `(bulkf #'bulkf-transfer
+          :pass ,quantity
+          :access ,source ,destination))
+
+(let ((account-amounts (list 35 90)))
+  (multiple-value-call #'values
+    (transferf 10
+               (first account-amounts)
+               (second account-amounts))
+    account-amounts))
+@result{} 25, 100, (25 100)
+
+
+(defun bulkf-init (value number-of-places)
+  (values-list (make-list number-of-places
+                          :initial-element value)))
+
+(defmacro initf (value &rest places)
+  `(bulkf #'bulkf-init
+          :pass ,value ,(length places)
+          :write ,@@places))
+
+(let (a b (c (make-list 3 :initial-element nil)))
+  (initf 0 a b (second c))
+  (values a b c))
+@result{} 0, 0, (NIL 0 NIL)
+
+
+(defun bulkf-spread (spread-function sum-function
+                     &rest place-values)
+  (values-list
+   (let ((number-of-places (length place-values)))
+     (make-list number-of-places
+                :initial-element
+                (funcall spread-function
+                         (apply sum-function place-values)
+                         number-of-places)))))
+
+(defmacro spreadf (spread-function sum-function &rest places)
+  `(bulkf #'bulkf-spread :pass ,spread-function ,sum-function
+          :access ,@@places))
+
+(let ((a 5) (b (list 10 18 20)))
+  (spreadf #'/ #'+ a (first b) (second b))
+  (values a b))
+@result{} 11, (11 11 20)
+
+(let ((a 2) (b (list 2 4 8)))
+  (spreadf #'* #'* a (first b) (second b) (third b))
+  (values a b))
+@result{} 512, (512, 512, 512)
+
+
+(defun bulkf-map (function &rest place-values)
+  (values-list (mapcar function place-values)))
+
+(defmacro mapf (function &rest places)
+  `(bulkf #'bulkf-map :pass ,function :access ,@@places))
+
+(let ((a 0) (b 5) (c (list 10 15)))
+  (values (multiple-value-list (mapf #'1+ a b (second c)))
+          a b c))
+@result{} (1 6 16), 1, 6, (10 16)
+
+
+(defun bulkf-steal (sum-function steal-function
+                    initial-assets &rest target-assets)
+  (let (stolen leftovers)
+    (mapc (lambda (assets)
+            (multiple-value-bind (steal leftover)
+                (funcall steal-function assets)
+              (push steal stolen)
+              (push leftover leftovers)))
+          target-assets)
+    (values-list
+     (cons (apply sum-function
+                  (cons initial-assets (nreverse stolen)))
+           (nreverse leftovers)))))
+
+(defmacro stealf (sum-function steal-function hideout &rest targets)
+  `(bulkf #'bulkf-steal :pass ,sum-function ,steal-function
+          :access ,hideout ,@@targets))
+
+(let ((cave :initial-assets)
+      (museum '(:paintings :collection))
+      (house 20000)
+      (triplex (list :nothing-valuable :random-stuff 400)))
+  (stealf #'list
+          (lambda (assets)
+            (if (eq assets :nothing-valuable)
+                (values nil assets)
+                (values assets (if (numberp assets) 0 nil))))
+          cave museum house (first triplex) (second triplex) (third triplex))
+  (values cave museum house triplex))
+@result{}
+(:INITIAL-ASSETS (:PAINTINGS :COLLECTION) 20000 NIL :RANDOM-STUFF 400)
+NIL
+0
+(:NOTHING-VALUABLE NIL 0)
+@end lisp
+@end deffn
+
+
+@node FUNCALLF/APPLYF
+@section @code{funcallf}/@code{applyf}
+
+@deffn {Modify Macro} funcallf function-form place@
+&rest other-arg-forms @result{} results
+@code{funcallf} updates a place by calling a function with the old
+value of the place as first argument, possibly along with other
+arguments. The result of the function is stored into the
+place. Specifically:
+
+@enumerate
+@item
+Evaluate @var{function-form} to produce @var{function};
+@item
+Evaluate the subforms of @var{place}, then read the primary value of
+@var{place} to produce @var{old-place-value};
+@item
+Evaluate each @var{other-arg-form} normally to produce
+@var{other-arg};
+@item
+Store into the @var{place} the primary value returned by calling
+@var{function} with @var{old-place-value} and @var{other-args} as
+arguments. If @var{place} has more than one store variable, the
+remaining such variables are bound to @code{nil} prior to evaluation
+of the storing form.
+@end enumerate
+@end deffn
+
+@deffn {Modify Macro} applyf function place &rest other-args @result{} results
+Same as @code{funcallf} except @code{apply} is used to call the
+@var{function} with the primary value of @var{place} and other-args.
+@end deffn
+
+
+@c @node PROXYF
+@c @section @code{proxyf}
+@c 
+@c @deffn {Accessor Modifier} proxyf (&key around-subform before-subform after-subform@
+@c around-write before-write after-write@
+@c around-read before-read after-read) place
+@c @code{proxyf} allows customization of a @var{place} by adding to or
+@c replacing the normal behavior of value forms, the storing form or the
+@c accessing form (here called ``subforms'', ``writer'' and ``reader'',
+@c respectively).
+@c 
+@c This customization is made by specifying ``customizers'' (functions)
+@c with the keyword arguments. As might be inferred from their names, the
+@c way of combining these customizers to produce an effective form for
+@c each of subform, writer and reader is inspired by standard method
+@c combination.
+@c 
+@c @uref{http://www.lispworks.com/documentation/HyperSpec/Body/07_ffb.htm,
+@c CLHS 7.6.6.2 Standard Method Combination}
+@c 
+@c The normal behavior of @var{place} for each of subforms, writer and
+@c reader form the 3 ``primary methods''. If a key argument is specified
+@c multiple times, all the specified customizers will be combined
+@c appropriately as in standard method combination. Around, before and
+@c after customizers specified earlier in the @code{proxyf} call are
+@c deemed ``more specific'' than later ones.
+@c 
+@c Since it's known at compile-time what types of customizers are
+@c supplied and in what order, the resulting setf-expansion should be
+@c about as efficient as if you'd have written an equivalent accessor
+@c modifier by hand.
+@c @end deffn
+@c 
+@c @defun call-next-customizer &rest args
+@c This function can be called from within the dynamic context of an
+@c around specializer and has behavior analogous to
+@c @code{call-next-method} for standard around methods. If called with no
+@c arguments, the arguments that were used to call the current around
+@c customizer are used to call the next customizer.
+@c 
+@c Note that unlike @code{call-next-method}, @code{call-next-customizer}
+@c is a global function. This is to eliminate the requirement of an
+@c explicit lambda if @code{call-next-customizer} needs to be
+@c called. @code{call-next-customizer} relies on dynamic context that is
+@c established only at the time around customizers are called. The
+@c consequences are undefined if @code{call-next-customizer} is called
+@c outside of this context.
+@c @end defun
+
+
+@node CACHEF
+@section @code{cachef}
+
+@deffn {Accessor Modifier} cachef cachedp-place cache-place init-form@
+&key test new-cachedp init-form-evaluates-to
+@sp 1
+@code{cachef} allows one to compute the value of a place only when
+it's first read.
+
+@sp 1
+
+The consequences are undefined if @var{cachedp-place} or
+@var{cache-place} involves more than one value. I initially planned to
+support multiple values everywhere but finally decided that it's
+overkill. An implementation is permitted to extend the semantics to
+support multiple values. (With that out of the way, the rest of the
+description will be simpler.)
+
+@sp 1
+
+@code{cachef} has two major modes of operation: ``in-cache cachedp''
+(ICC) mode and ``out-of-cache cachedp'' (OOCC) mode. The former is
+selected if @var{cachedp-place} is @code{nil} at macroexpansion-time,
+else the latter is selected.
+
+Let's first describe the semantics of the arguments without regard to
+their order in the lambda list nor the time at which they're
+evaluated. After, we'll @ref{ICC eval, the order of evaluation
+step-by-step for ICC mode}, and then we'll @ref{OOCC eval, it for OOCC
+mode}.
+
+@sp 1
+
+An important notion of @code{cachef} is, of course, how it tests to
+see if the cache is full or empty. The way this is done is to call
+@var{test-function} (the result of evaluating @var{test}) with
+an appropriate argument. In ICC mode, @var{test-function} is called with
+the value of @var{cache-place}. In OOCC mode, it's called with the
+value of @var{cachedp-place}. Either way, the cache is considered full
+or empty if @var{test-function} returns generalized @code{true} or
+@code{false}, respectively.
+
+Whenever @var{cache-place} is about to be read, if the cache is empty,
+it's first filled with @var{init-form}. The semantics of
+@var{init-form} are described below. In ICC mode, it's assumed that
+the new value tests as a full cache (else, the cache will be
+``re-filled'' next time). In OOCC mode, whenever the cache is written
+to (regardless of if this write results from a cache-miss or a direct
+request), @var{cachedp-place} is set to the value of
+@var{new-cachedp}. It's an error to supply @var{new-cachedp} in ICC
+mode, as it's not needed (@var{init-form} somewhat fulfills its role).
+
+@var{init-form} is a form that either evaluates to the values to store
+into the cache, or to a function that performs such an evaluation,
+depending on whether @var{init-form-evaluates-to} is @code{:value} or
+@code{:function} (at macroexpansion-time), respectively. The former is
+convenient in simple scenarios where there is no ``distance'' between
+the evaluation of subforms and access to the cache, while the latter
+is more likely to be correct in more complex cases (such as when used
+with @code{with-resolved-places}) by virtue of capturing the lexical
+context in which the subforms are evaluated instead of whichever one
+is current at the place in the code where the cache is accessed.
+
+@sp 1
+
+@var{cache-place} holds the cached value if the cache is full, or a
+placeholder value if the cache is empty. In ICC mode, this value
+itself is tested to see if the cache is full or empty. For instance, a
+value of @code{nil} might indicate an empty cache, while any other
+value indicates a full cache (this is the default behavior, as
+@var{test} defaults to @code{'#'identity}). Of course, in this case
+there's no way to distinguish between an empty cache and a full cache
+containing @code{nil}. A possible workaround would be to use a gensym
+as a ``cache-is-empty'' marker, however this might not be
+performance-friendly. For instance, if the cache only ever contains
+values of type (mod 1024), one might want to declare this type, but a
+gensym is not valid. One would have to declare a type of (or symbol
+(mod 1024)). In this case, OOCC mode might be preferable, as the
+@var{cachedp-place} can be declared to be of type @code{boolean} (for
+example) while the @var{cache-place} can be declared to be of the
+exact type of values that might be stored in the cache.
+
+@sp 1
+
+@anchor{ICC eval} Here's the order of evaluation in ICC mode. At the
+time subforms of the @code{cachef} place are evaluated:
+
+@enumerate
+@item
+The subforms of @var{cache-place} are evaluated.
+
+@item
+If @var{init-form-evaluates-to} is @code{:function}, @var{init-form}
+is evaluated to produce @var{init-form-function}.
+
+@item
+@var{test} is evaluated to produce @var{test-function}.
+@end enumerate
+
+At the time an attempt is made to read the value of the @code{cachef}
+place:
+
+@enumerate
+@item
+@var{test-function} is called with the value of @var{cache-place},
+producing @var{fullp}.
+
+@item
+If @var{fullp} is generalized true, the value of @var{cache-place}
+that was read in step 1 is simply returned. Else, @var{cache-place} is
+assigned the result of evaluating the @var{init-form} and that value
+is returned.
+@end enumerate
+
+At the time a value is assigned to the @code{cachef} place, the value
+is simply stored into @var{cache-place} directly and it's assumed that
+calling @var{test-function} with this value the next time the
+@code{cachef} place is read will return generalized true, indicating a
+full cache.
+
+@sp 1
+
+@anchor{OOCC eval} Here's the order of evaluation in OOCC mode. At the
+time subforms of the @code{cachef} place are evaluated:
+
+@enumerate
+@item
+The subforms of @var{cachedp-place} are evaluated.
+
+@item
+The subforms of @var{cache-place} are evaluated.
+
+@item
+If @var{init-form-evaluates-to} is @code{:function}, @var{init-form}
+is evaluated to produce @var{init-form-function}.
+
+@item
+@var{test} and @var{new-cachedp} are evaluated in the order they appear.
+@end enumerate
+
+At the time an attempt is made to read the value of the @code{cachef}
+place:
+
+@enumerate
+@item
+@var{test-function} is called with the value of @var{cachedp-place},
+producing @var{fullp}.
+
+@item
+If @var{fullp} is generalized true, The value of @var{cache-place}
+that was read in step 1 is simply returned. Else, @var{cache-place} is
+assigned the result of evaluating the @var{init-form} and that value
+is returned.
+@end enumerate
+
+At the time a value is assigned to the @code{cachef} place, the value
+is stored into @var{cache-place} and the result of evaluating
+@var{new-cachedp} (that was evaluated along with the subforms
+previously) is stored into @var{cachedp-place}.
+
+@lisp
+(let ((cache "cached-string"))
+  (incf (cachef nil cache 0 :test #'numberp) (print (+ 5 2)))
+  cache)
+@print{} 7
+@result{} 7
+
+(let ((cache 20))
+  (incf (cachef nil cache 0 :test #'numberp) (print (+ 5 2)))
+  cache)
+@print{} 7
+@result{} 27
+
+(let ((values (list :empty :placeholder)))
+  (cachef (first values) (second (print values))
+          :computed-value
+          :test (lambda (marker)
+                  (ecase marker
+                    (:full t)
+                    (:empty nil)))
+          :new-cachedp :full)
+  values)
+@print{} (:EMPTY :PLACEHOLDER) 
+@result{} (:FULL :COMPUTED-VALUE)
+@end lisp
+@end deffn
+
+
+@node OLDF
+@section @code{oldf}
+
+@deffn {Accessor Modifier} oldf place
+@var{oldf} simply modifies the behavior of the storing form of
+@var{place} so that it returns the old values of the place instead of
+the new ones.
+
+@lisp
+(let ((a 5))
+  (values (incf (oldf a) 2)
+          a))
+@result{} 5, 7
+
+(let ((a 5))
+  (values (setf (oldf a) 10)
+          a))
+@result{} 5, 10
+
+(let ((list '(1 2 3)))
+  (values (push 0 (oldf list))
+          list))
+@result{} (1 2 3), (0 1 2 3)
+@end lisp
+@end deffn
+
+
+@node READF
+@section @code{readf}
+
+@deffn {Accessor Modifier} readf place
+This is a most highly trivial accessor modifier useful to easily make
+a place work in non-place contexts.
+
+A recurring pattern is that you invent a new type of place modifier,
+so you define a new setf-expander. When the place modifier is called
+in a regular, non-place context, you just want to evaluate the
+subforms appropriately and then read the place.
+
+To use @code{readf}, simply make a macro with the same name and
+parameters as the setf-expander. Expand to `(readf ,@var{whole}),
+where @var{whole} is the @var{&whole} variable in your lambda
+list. (Don't worry, this doesn't result in an infinite recursive expansion.)
+
+(I'm still wondering if @code{readf} makes any sense at all or if
+there's a much simpler way to do this... @code{cachef}, @code{oldf}
+and @code{tracef} use it so there appears to be at least some marginal
+value...)
+@end deffn
+
+
+@node TRACEF
+@section @code{tracef}
+
+@deffn {Accessor Modifier} tracef place
+@code{tracef} returns the setf-expander of @var{place}, modified so
+that relevant debug information is printed (in an unspecified format)
+on @code{*trace-output*} as well as performing the normal behavior.
+
+Debug information is printed when a subform is evaluated and when the
+place is read from or written to.
+
+@lisp
+(let ((a (list 2)))
+  (incf (tracef (car (print a)))
+        3))
+(2) 
+@print{} TRACEF: Place: (CAR (PRINT A))
+@print{} TRACEF: Action: Evaluate Subform
+@print{} TRACEF: Subform: (PRINT A)
+@print{} TRACEF: Result: (2)
+@print{} 
+@print{} TRACEF: Place: (CAR (PRINT A))
+@print{} TRACEF: Action: Read
+@print{} TRACEF: Values: (2)
+@print{} 
+@print{} TRACEF: Place: (CAR (PRINT A))
+@print{} TRACEF: Action: Write
+@print{} TRACEF: Values: (5)
+@result{} 5
+@end lisp
+@end deffn
+
+
+@node Unlicense
+@appendix Unlicense
+
+This is free and unencumbered software released into the public domain.
+
+Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
+
+In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of all present and future rights to this
+software under copyright law.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+@c @node Index
+@c @unnumbered Index
+
+@c @printindex cp
+
+@bye

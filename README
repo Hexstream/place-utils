@@ -1,0 +1,15 @@
+Project's home: http://www.hexstreamsoft.com/projects/place-utils/
+
+
+Place-utils is a Common Lisp library that provides a few utilities
+relating to setfable places.
+
+
+Place-utils has no dependencies.
+
+Load it with ASDF: (asdf:operate 'asdf:load-op '#:place-utils).
+(Make sure ASDF can find place-utils.asd beforehand.)
+
+
+This library is in the public domain.
+See the UNLICENSE file for details.
