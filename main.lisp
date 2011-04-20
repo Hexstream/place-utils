@@ -177,6 +177,63 @@
 	     (let (,@unused-stores)
 	       (values ,@writers))))))))
 
+(defun %default-on-replace (old new)
+  (declare (ignore old))
+  new)
+
+(defmacro setfnew (place new &rest key-args &key key test on-replace
+		   &environment env)
+  (declare (ignore key test on-replace))
+  (when (get-properties key-args '(:test-not))
+    (error ":test-not is not supported."))
+  (unless (get-properties key-args '(:on-replace))
+    (setf key-args `(:on-replace #'%default-on-replace ,@key-args)))
+  (unless (get-properties key-args '(:test))
+    (setf key-args `(:test #'eql ,@key-args)))
+  (unless (get-properties key-args '(:key))
+    (setf key-args `(:key #'identity ,@key-args)))
+  (multiple-value-bind (subvars subforms stores writer reader)
+      (get-setf-expansion place env)
+    (when (cdr stores)
+      (error "SETFNEW only supports one store variable at this time."))
+    (let* ((key-var (gensym "KEY"))
+	   (test-var (gensym "TEST"))
+	   (on-replace-var (gensym "ON-REPLACE"))
+	   (keyword-vars `((:key . ,key-var)
+			   (:test . ,test-var)
+			   (:on-replace . ,on-replace-var)))
+	   (old-var (gensym "OLD"))
+	   (new-var (car stores)))
+      (multiple-value-bind (key-arg-bindings surplus-keyword-arg-forms)
+	  (do (key-arg-bindings surplus-keyword-arg-forms
+	       seen-key-test
+	       (key-args key-args (cddr key-args)))
+	      ((endp key-args)
+		 (values (nreverse key-arg-bindings)
+			 (nreverse surplus-keyword-arg-forms)))
+	    (destructuring-bind (key value &rest rest)
+		key-args
+	      (declare (ignore rest))
+	      (when (member key '(:key :test :on-replace))
+		(if (member key seen-key-test)
+		    (push value surplus-keyword-arg-forms)
+		    (progn
+		      (push key seen-key-test)
+		      (push `(,(cdr (assoc key keyword-vars))
+			       ,value)
+			    key-arg-bindings))))))
+	`(let* (,@(mapcar #'list subvars subforms)
+		(,old-var ,reader)
+		(,new-var ,new)
+		,@key-arg-bindings)
+	   ,@surplus-keyword-arg-forms
+	   (unless ,key-var (setf ,key-var #'identity))
+	   (unless (funcall ,test-var
+			    (funcall ,key-var ,old-var)
+			    (funcall ,key-var ,new-var))
+	     (setf ,new-var (funcall ,on-replace-var ,old-var ,new-var))
+	     ,writer))))))
+
 (defmacro funcallf (function place &rest other-args)
   `(bulkf funcall ,function ,place :pass ,@other-args))
 

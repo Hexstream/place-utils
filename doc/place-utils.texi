@@ -76,6 +76,7 @@ should prove invaluable in understanding this material.
 
 * UPDATEF::               Like @code{setf}, except supply update functions instead of new values.
 * BULKF::                 Flexible mass updating of places.
+* SETFNEW::               Store a new value in a place only if it's different than the old one.
 * FUNCALLF/APPLYF::       Store into a place the result of calling a function with
                           its old value, possibly with further arguments.
 
@@ -101,6 +102,8 @@ Here are all the symbols exported by place-utils.
 @item Modify Macro @tab @code{updatef} @tab Like @code{setf}, except supply update functions@*(to be called with old values) instead of new values.
 @item
 @item Modify Macro @tab @code{bulkf} @tab Flexible mass updating of places.@*An update function receives the old values as arguments@*and returns the values to write back as multiple values.
+@item
+@item Modify Macro @tab @code{setfnew} @tab Store a new value in a place@*only if it's different than the old one.@*A callback can signal a warning or continuable error prior to an update.
 @item
 @item Modify Macro @tab @code{funcallf} @tab Store into a place the result of calling@*an update function with the old value of the place,@*possibly along with additional regular arguments.
 @item Modify Macro @tab @code{applyf} @tab Same as @code{funcallf} except @code{apply} is used.
@@ -422,6 +425,69 @@ NIL
 @end deffn
 
 
+@node SETFNEW
+@section @code{setfnew}
+
+@deffn {Modify Macro} setfnew place newvalue &key key test on-replace @result{} value
+@code{setfnew} is to @code{setf} as @code{pushnew} is to @code{push}, approximately.
+
+@code{setfnew} doesn't support multiple values at this time (the
+biggest issue would be deciding what arguments to call the @var{test}
+with...). The consequences are undefined if the reader of @var{place}
+returns multiple values or if @var{place} has more than one store
+variable.
+
+Here's the evaluation sequence and semantics:
+
+@enumerate
+@item
+Evaluate the subforms of @var{place} and read the @var{old} value.
+
+@item
+Evaluate @var{newvalue} to get the @var{new} value that is to be
+stored into @var{place} if it's ``different'' than @var{old}.
+
+@item
+Evaluate all the keyword arguments in the order they appear in the
+macro call. Only the first of each of these is retained for further
+processing. Any further instances are still evaluated for side-effects
+and their values are discarded.
+
+@table @var
+@item :key
+Evaluates to either @code{nil} or a function of one argument used to
+get at the actual value that will be tested to see if they're the same
+or different. A value of @code{nil} is treated the same as
+@code{#'identity}, which is the default.
+
+@item :test
+Called with the @var{key} of @var{old} and the @var{key} of
+@var{new}. Should return generalized true if the @var{old} value is
+considered ``equal'' to @var{new}. The default is @code{#'eql}.
+
+@item :on-replace
+If the @var{old} and @var{new} values were deemed different by
+@var{test} (possibly modified by @var{key}), on-replace is immediately
+called with two arguments: the @var{old} and @var{new} value. The
+value that the @var{on-replace} function returns will be stored into
+the place. @var{on-replace} has an opportunity to do such things as
+signalling a warning or continuable error before actually letting the
+storing of the @var{new} value into the place. @var{on-replace} might
+also substitute an appropriate ``normalized'' value to be stored in
+@var{place}.
+
+If the @var{old} and @var{new} values were deem to be equivalent (that
+is, if @var{test} returned generalized true), @code{setfnew} immediately returns the old value and @var{on-replace} is not called.
+
+The default for @var{on-replace} is a function of two arguments that
+simply returns the second argument. In other words, the @var{new}
+value is stored into the place directly.
+
+@end table
+@end enumerate
+@end deffn
+
+
 @node FUNCALLF/APPLYF
 @section @code{funcallf}/@code{applyf}
 
@@ -643,7 +709,8 @@ If @var{init-form-evaluates-to} is @code{:function}, @var{init-form}
 is evaluated to produce @var{init-form-function}.
 
 @item
-@var{test} and @var{new-cachedp} are evaluated in the order they appear.
+@var{test} and @var{new-cachedp} are evaluated in the order they
+appear in the macro call.
 @end enumerate
 
 At the time an attempt is made to read the value of the @code{cachef}

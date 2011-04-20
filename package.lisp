@@ -7,6 +7,7 @@
 	   
 	   #:updatef
 	   #:bulkf
+	   #:setfnew
 	   #:funcallf
 	   #:applyf
 
