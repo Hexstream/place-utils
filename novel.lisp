@@ -181,6 +181,7 @@
   (declare (ignore old))
   new)
 
+#+nil
 (defmacro setfnew (place new &rest key-args &key key test on-replace
 		   &environment env)
   (declare (ignore key test on-replace))
@@ -206,11 +207,11 @@
 	   (new-var (car stores)))
       (multiple-value-bind (key-arg-bindings surplus-keyword-arg-forms)
 	  (do (key-arg-bindings surplus-keyword-arg-forms
-	       seen-key-test
-	       (key-args key-args (cddr key-args)))
+				seen-key-test
+				(key-args key-args (cddr key-args)))
 	      ((endp key-args)
-		 (values (nreverse key-arg-bindings)
-			 (nreverse surplus-keyword-arg-forms)))
+	       (values (nreverse key-arg-bindings)
+		       (nreverse surplus-keyword-arg-forms)))
 	    (destructuring-bind (key value &rest rest)
 		key-args
 	      (declare (ignore rest))
@@ -224,8 +225,8 @@
 			    key-arg-bindings))))))
 	`(let* (,@(mapcar #'list subvars subforms)
 		(,old-var ,reader)
-		(,new-var ,new)
-		,@key-arg-bindings)
+		  (,new-var ,new)
+		  ,@key-arg-bindings)
 	   ,@surplus-keyword-arg-forms
 	   (unless ,key-var (setf ,key-var #'identity))
 	   (unless (funcall ,test-var
@@ -233,12 +234,6 @@
 			    (funcall ,key-var ,new-var))
 	     (setf ,new-var (funcall ,on-replace-var ,old-var ,new-var))
 	     ,writer))))))
-
-(defmacro funcallf (function place &rest other-args)
-  `(bulkf funcall ,function ,place :pass ,@other-args))
-
-(defmacro applyf (function place &rest other-args)
-  `(bulkf apply ,function ,place :pass ,@other-args))
 
 (define-setf-expander cachef (cachedp-place
 			      cache-place

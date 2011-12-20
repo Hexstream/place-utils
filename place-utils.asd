@@ -1,12 +1,15 @@
-(in-package #:cl-user)
-(defpackage #:place-utils.system
-  (:use #:cl #:asdf))
-(in-package #:place-utils.system)
+(asdf:defsystem #:place-utils
 
-
-(defsystem place-utils
   :author "Jean-Philippe Paradis <hexstream@gmail.com>"
-  :version "0.1"
-  :description "Provides a few utilities relating to setfable places."
+
+  ;; See the UNLICENSE file for details.
+  :license "Public Domain"
+
+  :description "Provides utilities relating to setfable places: a few novel ones and a good number of trivial, traditional ones."
+
+  :version "0.2"
+  :serial cl:t
   :components ((:file "package")
-	       (:file "main" :depends-on ("package"))))
+	       (:file "enhanced")
+	       (:file "novel")
+	       #+nil(:file "traditional")))
