@@ -7,6 +7,8 @@
   ;; Novel
   (:export #:&place
 	   #:define-modify-macro
+	   #:define-modify-macro*
+	   #:modify
 	   #:setf-expanderlet
 	   #:with-resolved-places
 	   
