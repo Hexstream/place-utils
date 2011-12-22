@@ -24,10 +24,13 @@
     alpha-char-p
     alphanumericp
     (macro and) (macro (and *))
+    (macro or (macro (or *)))
     append (append *)
+    nconc (nconc *)
     (apply 2) (apply *)
     apropos-list
     aref ((aref *) 2) ; caution
+    svref (svref *)
     arithmetic-error-operands
     arithmetic-error-operation
     array-dimension (array-dimension *)
@@ -46,7 +49,7 @@
     ((assoc *) 1) ((assoc-if *) 1) ((assoc-if-not *) 1)
     atan ((atan *) 2) atanh
     atom
-    bit ((bit *) 2) ; caution
+    bit ((bit *) 2) sbit ((sbit *) 2); caution
     )
 
 (macrolet ((d (&rest function-names)
@@ -75,6 +78,7 @@
     boundp
     broadcast-stream-streams
     butlast
+    nbutlast
     byte (byte *)
     byte-position
     byte-size
@@ -99,7 +103,7 @@
      truncate ftruncate))
 
 (%d cell-error-name
-    char (char *)
+    char (char *) schar (schar *)
     char-code
     code-char
     char-int
@@ -185,7 +189,7 @@
     elt (elt *)
     endp
     enough-namestring ((enough-namestring *) 2)
-    ensure-directories-exist ; supplied for 2nd return value
+    ensure-directories-exist	       ; supplied for 2nd return value
     ensure-generic-function
     eq (eq *)
     eql (eql *)
@@ -193,6 +197,9 @@
     equalp (equalp *)
     evenp
     (every 2) (every *)
+    (notany 2) (notany *)
+    (notevery 2) (notevery *)
+    (some 2) (some *)
     exp
     expt (expt *)
     fboundp
@@ -243,7 +250,6 @@
     host-namestring
     identity
     imagpart
-    initialize-instance
     input-stream-p
     integer-decode-float
     integer-length
@@ -251,6 +257,7 @@
     interactive-stream-p
     intern ((intern *) 2)
     intersection ((intersection *) 2)
+    nintersection ((nintersection *) 2)
     invoke-restart
     invoke-restart-interactively
     isqrt
@@ -271,7 +278,7 @@
     logand (logand *)
     logandc1 (logandc1 *)
     logandc2 (logandc2 *)
-    (logbitp 2) ((logbitp *) 1) ; caution
+    (logbitp 2) ((logbitp *) 1)		; caution
     logcount
     logeqv (logeqv *)
     logical-pathname
@@ -307,11 +314,11 @@
     make-two-way-stream (make-two-way-stream *)
     (map 3) (map *)
     (map-into 3) (map-into *)
-    (mapc 2) (mapc *) ; caution, todo
+    (mapc 2) (mapc *)			; caution, todo
     (mapcar 2) (mapcar *) (mapcan 2) (mapcan *)
-    mapl ; caution, todo
+    mapl				; caution, todo
     (maplist 2) (maplist *) (mapcon 2) (mapcon *)
-    maphash ; caution, todo
+    maphash				; caution, todo
     (maskfield 2)
     max (max *)
     (member 2) (member-if 2) (member-if-not 2) ; caution
@@ -323,5 +330,176 @@
     minusp
     mismatch ((mismatch *) 2)
     mod (mod *)
-    multiple-value-call ; caution, todo
-    )
+    multiple-value-call			; caution, todo
+    name-char
+    namestring
+    no-applicable-method
+    no-next-method
+    nreconc (nreconc *)
+    nreverse
+    nset-difference ((nset-difference *) 2)
+    nset-exclusive-or ((nset-exclusive-or *) 2)
+    nstring-capitalize
+    nstring-downcase
+    nstring-upcase
+    (nsublis 2) ((nsublis *) 1)
+    (nsubst 3) (nsubst-if 3) (nsubst-if-not 3)
+    (nsubstitute 3) (nsubstitute-if 3) (nsubstitute-if-not 3)
+    (nth 2) ((nth *) 1)
+    (nthcdr 2) ((nthcdr *) 1)
+    null
+    numberp
+    numerator
+    nunion ((nunion *) 2)
+    oddp
+    open
+    open-stream-p
+    output-stream-p
+    package-error-package
+    package-name
+    package-nicknames
+    package-shadowing-symbols
+    package-use-list
+    package-used-by
+    packagep
+    (pairlis 3)
+    parse-integer
+    parse-namestring
+    pathname
+    pathname-device
+    pathname-directory
+    pathname-host
+    pathname-match-p (pathname-match-p *)
+    pathname-name
+    pathname-type
+    pathname-version
+    pathnamep
+    phase
+    plusp
+    (position 2) (position-if 2) (position-if-not 2)
+    (pprint-dispatch 2) ((pprint-dispatch *) 1)
+    (pprint-fill 2) (pprint-linear 2) (pprint-tabular 2)
+    prin1 prin1-to-string
+    princ princ-to-string
+    print-not-readable-object
+    probe-file
+    (random 2) ((random *) 1)
+    random-state-p
+    (rassoc 2) ((rassoc *) 1) (rassoc-if 2) (rassoc-if-not 2)
+    rational rationalize
+    rationalp
+    read
+    read-byte
+    read-char
+    read-char-no-hang
+    (read-delimited-list 2) ((read-delimited-list *) 1)
+    read-from-string
+    read-line
+    read-preserving-whitespace
+    read-sequence
+    readtable-case
+    readtablep
+    realp
+    realpart
+    (reduce 2)
+    rem (rem *)
+    (remhash 2) ((remhash *) 1)
+    (remove 2) ((remove *) 1) (remove-if 2) (remove-if-not 2)
+    remove-duplicates
+    rename-file (rename-file *)
+    rename-package
+    replace ((replace *) 2)
+    rest
+    restart-name
+    revappend (revappend *)
+    reverse
+    row-major-aref (row-major-aref *)
+    scale-float (scale-float *)
+    search ((search *) 2)
+    set
+    set-difference ((set-difference *) 2)
+    set-exclusive-or ((set-exclusive-or *) 2)
+    signum
+    simple-bit-vector-p
+    simple-condition-format-arguments
+    simple-condition-format-control
+    simple-string-p
+    simple-vector-p
+    sin sinh
+    slot-boundp (slot-boundp *)
+    slot-exists-p (slot-exists-p *)
+    slot-value (slot-value *)
+    sort
+    special-operator-p
+    sqrt
+    stable-sort
+    standard-char-p
+    stream-element-type
+    stream-error-stream
+    stream-external-format
+    streamp
+    string
+    string-capitalize
+    string-downcase
+    string-equal ((string-equal *) 2)
+    string-greaterp ((string-greaterp *) 2)
+    (string-left-trim 2) ((string-left-trim *) 1)
+    (string-right-trim 2) ((string-right-trim *) 1)
+    (string-trim 2) ((string-trim *) 1)
+    string-lessp ((string-lessp *) 2)
+    string-not-equal ((string-not-equal *) 2)
+    string-not-greaterp ((string-not-greaterp *) 2)
+    string-not-lessp ((string-not-lessp *) 2)
+    string-upcase
+    string/= ((string/= *) 2)
+    string< ((string< *) 2)
+    string<= ((string<= *) 2)
+    string= ((string= *) 2)
+    string> ((string> *) 2)
+    string>= ((string>= *) 2)
+    stringp
+    (sublis 2) ((sublis *) 1)
+    subseq
+    subsetp ((subsetp *) 2)
+    (subst 3) (subst-if 3) (subst-if-not 3)
+    (substitute 3) (substitute-if 3) (substitute-if-not 3)
+    subtypep ((subtypep *) 2)
+    sxhash
+    symbol-function
+    symbol-name
+    symbol-package
+    symbol-plist
+    symbol-value
+    symbolp
+    synonym-stream-symbol
+    (tailp 2) ((tailp *) 1)
+    tan tanh
+    ; the: todo
+    translate-logical-pathname
+    translate-pathname
+    tree-equal ((tree-equal *) 2)
+    truename
+    two-way-stream-input-stream
+    two-way-stream-output-stream
+    type-error-datum
+    type-error-expected-type
+    type-of
+    typep ((typep *) 2)
+    unbound-slot-instance
+    unintern ((unintern *) 2)
+    union ((union *) 2)
+    ;unless todo
+    ;when todo
+    upgraded-array-element-type
+    upgraded-complex-part-type
+    upper-case-p
+    user-homedir-pathname
+    vector (vector *)
+    vector-pop
+    (vector-push 2) ((vector-push *) 1)
+    (vector-push-extend 2) ((vector-push-extend *) 1)
+    vectorp
+    wild-pathname-p
+    write
+    write-to-string
+    zerop)
