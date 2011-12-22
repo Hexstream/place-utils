@@ -379,6 +379,24 @@
   `(readf ,whole))
 
 
+(defmacro with-hash-table ((accessor hash) &body body)
+  (let ((key (gensym (string '#:key)))
+        (new (gensym (string '#:new))))
+    `(let ((,accessor ,hash))
+       (flet ((,accessor (,key)
+                (gethash ,key ,accessor))
+              ((setf ,accessor) (,new ,key)
+                (setf (gethash ,key ,accessor) ,new)))
+         (declare (ignorable #',accessor #'(setf ,accessor)))
+         ,@body))))
+
+#+nil
+(with-hash-table (hash (make-hash-table :test 'equal))
+  (setf (hash "Key one") (concatenate 'string "Value" " " "one")
+        (hash (string-upcase "Another")) "Value")
+  (values hash (hash "Key one") (hash "ANOTHER")))
+
+
 ;; Doesn't handle declarations at this time.
 ;; I'm not sure this really belongs here...
 #+nil
