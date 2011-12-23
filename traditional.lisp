@@ -151,7 +151,7 @@
     (concatenate 2) (concatenate *)
     concatenated-stream-streams
     conjugate
-    cons (cons *)
+    (cons 2) ((cons *) 1)
     consp
     constantly
     constantp
@@ -269,6 +269,7 @@
     ldiff ((ldiff *) 2)
     length
     list (list *)
+    (list* :last) ((list* *) 1)
     list-length
     listen
     listp
