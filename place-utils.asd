@@ -10,6 +10,4 @@
   :version "0.2"
   :serial cl:t
   :components ((:file "package")
-	       (:file "enhanced")
-	       (:file "novel")
-	       #+nil(:file "traditional")))
+	       (:file "main")))
