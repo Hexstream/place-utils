@@ -151,10 +151,10 @@
             <div class="scroll">
               <pre class="example"><code class="common-lisp">(let* ((<var>my-list</var> (list 0 1 2))
        (<var>my-other-list</var> <var>my-list</var>))
-       (<code class="common-lisp library macro operator">with-resolved-places</code> ((<var>second</var> (second (princ <var>my-list</var>))))
-       (setf <var>my-list</var> nil <var>second</var> 8)
-       (incf <var>second</var> 2)
-  (list <var>my-list</var> <var>my-other-list</var> <var>second</var>)))
+  (<code class="common-lisp library macro operator">with-resolved-places</code> ((<var>second</var> (second (princ <var>my-list</var>))))
+    (setf <var>my-list</var> nil <var>second</var> 8)
+    (incf <var>second</var> 2)
+    (list <var>my-list</var> <var>my-other-list</var> <var>second</var>)))
 
 -| (0 1 2)
 &rArr; (NIL (0 10 2) 10)</code></pre>
