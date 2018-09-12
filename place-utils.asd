@@ -5,7 +5,7 @@
   ;; See the UNLICENSE file for details.
   :license "Public Domain"
 
-  :description "Provides utilities relating to setfable places: a few novel ones and a good number of trivial, traditional ones."
+  :description "Provides a few utilities relating to setfable places."
 
   :version "0.2"
   :serial cl:t
