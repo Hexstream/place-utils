@@ -10,4 +10,6 @@
   :version "0.2"
   :serial cl:t
   :components ((:file "package")
-	       (:file "main")))
+	       (:file "main"))
+
+  :in-order-to ((asdf:test-op (asdf:test-op #:place-utils_tests))))
