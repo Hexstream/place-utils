@@ -1,9 +1,8 @@
 (asdf:defsystem #:place-utils
 
-  :author "Jean-Philippe Paradis <hexstream@gmail.com>"
+  :author "Jean-Philippe Paradis <hexstream@hexstreamsoft.com>"
 
-  ;; See the UNLICENSE file for details.
-  :license "Public Domain"
+  :license "Unlicense"
 
   :description "Provides a few utilities relating to setfable places."
 

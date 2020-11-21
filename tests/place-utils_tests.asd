@@ -2,8 +2,7 @@
 
   :author "Jean-Philippe Paradis <hexstream@gmail.com>"
 
-  ;; See the UNLICENSE file for details.
-  :license "Public Domain"
+  :license "Unlicense"
 
   :description "place-utils unit tests."
 
