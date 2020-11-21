@@ -42,7 +42,7 @@
 
       </div>
 
-      <p id="last-updated"><span>This page was last updated on </span><time datetime="2018-09-12">12 september 2018</time><span>.</span></p>
+      <p id="last-updated"><span>This page was last updated on </span><time datetime="2020-11-21">21 november 2020</time><span>.</span></p>
 
     </nav>
 
@@ -99,7 +99,6 @@
           <li><a href="#with-resolved-places">with-resolved-places</a></li>
           <li><a href="#updatef">updatef</a></li>
           <li><a href="#bulkf">bulkf</a></li>
-          <li><a href="#funcallf-applyf">funcallf-applyf</a></li>
           <li><a href="#cachef">cachef</a></li>
           <li><a href="#oldf">oldf</a></li>
           <li><a href="#readf">readf</a></li>
@@ -430,42 +429,6 @@ NIL
             "<span>bulkf</span>" end.
           </a>
         </nav>
-
-      </section>
-
-      <section id="funcallf-applyf">
-
-        <h1 class="breadcrumbs-bar">
-          <span class="section-relative-nav">
-            <a href="#funcallf-applyf" class="anchor">⚓</a>
-          </span>
-          <span class="breadcrumbs">
-            <a href="#">place-utils</a>
-            <span class="crumb"><span class="s"> » </span><a class="here">funcallf-applyf</a></span>
-          </span>
-        </h1>
-
-        <p class="description">Store into a place the result of calling an update function with the old value of the place, possibly along with additional regular arguments.</p>
-
-        <dl>
-
-          <dt><pre>Modify Macro <dfn><code class="relevant">funcallf</code></dfn> <var>function-form</var> <var>place</var> &amp;rest <var>other-arg-forms</var>
-  &rArr; <var>results</var></pre></dt>
-          <dd>
-            <p><code class="relevant">funcallf</code> updates a place by calling a function with the old value of the place as first argument, possibly along with other arguments. The result of the function is stored into the place. Specifically:</p>
-            <ol>
-              <li>Evaluate <var>function-form</var> to produce <var>function</var>;</li>
-              <li>Evaluate the subforms of <var>place</var>, then read the primary value of <var>place</var> to produce <var>old-place-value</var>;</li>
-              <li>Evaluate each <var>other-arg-form</var> normally to produce <var>other-arg</var>;</li>
-              <li>Store into the <var>place</var> the primary value returned by calling <var>function</var> with <var>old-place-value</var> and <var>other-args</var> as arguments. If <var>place</var> has more than one store variable, the remaining such variables are bound to <code>nil</code> prior to evaluation of the storing form.</li>
-            </ol>
-          </dd>
-
-          <dt><pre>Modify Macro <dfn><code class="relevant">applyf</code></dfn> <var>function</var> <var>place</var> &amp;rest <var>other-args</var>
-  &rArr; <var>results</var></pre></dt>
-          <dd><p>Same as <code class="relevant">funcallf</code> except <code>apply</code> is used to call the <var>function</var> with the primary value of <var>place</var> and <var>other-args</var>.</p></dd>
-
-        </dl>
 
       </section>
 

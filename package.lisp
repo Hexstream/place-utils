@@ -6,8 +6,6 @@
 	   #:with-resolved-places
 	   #:updatef
 	   #:bulkf
-           #:funcallf
-           #:applyf
 	   #:cachef
 	   #:oldf
 	   #:readf
