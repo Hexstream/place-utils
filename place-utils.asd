@@ -8,7 +8,9 @@
 
   :version "0.2"
   :serial cl:t
+  :depends-on (#:alexandria)
   :components ((:file "package")
-	       (:file "main"))
+               (:file "main")
+               (:file "cachef"))
 
   :in-order-to ((asdf:test-op (asdf:test-op #:place-utils_tests))))

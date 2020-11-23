@@ -10,6 +10,7 @@
                "parachute")
 
   :serial cl:t
-  :components ((:file "tests"))
+  :components ((:file "tests")
+               (:file "cachef"))
 
   :perform (asdf:test-op (op c) (uiop:symbol-call '#:parachute '#:test '#:place-utils_tests)))

@@ -1,4 +1,5 @@
 (cl:defpackage #:place-utils_tests
+  (:local-nicknames (#:a #:alexandria))
   (:use #:cl #:place-utils #:parachute))
 
 (cl:in-package #:place-utils_tests)
@@ -65,7 +66,7 @@
              (initf 0 a b (second c))
              (values a b c)))))
   (flet ((bulkf-spread (spread-function sum-function
-                                        &rest place-values)
+                        &rest place-values)
            (values-list
             (let ((number-of-places (length place-values)))
               (make-list number-of-places
@@ -97,7 +98,7 @@
                0
                (:NOTHING-VALUABLE NIL 0))
        (flet ((bulkf-steal (sum-function steal-function
-                                         initial-assets &rest target-assets)
+                            initial-assets &rest target-assets)
                 (let (stolen leftovers)
                   (mapc (lambda (assets)
                           (multiple-value-bind (steal leftover)
@@ -123,27 +124,7 @@
                            (values assets (if (numberp assets) 0 nil))))
                      cave museum house (first triplex) (second triplex) (third triplex))
              (values cave museum house triplex)))))
-  (flet ((test (initial-value expected-result)
-           (are equal expected-result
-                (let ((cache initial-value)
-                      (output (make-array 0 :element-type 'character :fill-pointer t :adjustable t)))
-                  (with-output-to-string (*standard-output* output)
-                    (incf (cachef nil cache 0 :test #'numberp) (princ (+ 5 2)))
-                    (values cache output))))))
-    (test "cached-string" '(7 "7"))
-    (test 20 '(27 "7")))
-  (are equal '((:full :computed-value) "(:EMPTY :PLACEHOLDER)")
-       (let ((values (list :empty :placeholder))
-             (output (make-array 0 :element-type 'character :fill-pointer t :adjustable t)))
-         (with-output-to-string (*standard-output* output)
-           (cachef (first values) (second (prin1 values))
-                   :computed-value
-                   :test (lambda (marker)
-                           (ecase marker
-                             (:full t)
-                             (:empty nil)))
-                   :new-cachedp :full)
-           (values values output))))
+  ;; For CACHEF examples, see cachef.lisp
   (are equal '(5 7)
        (let ((a 5))
          (values (incf (oldf a) 2)
