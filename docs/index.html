@@ -483,12 +483,12 @@ NIL
               </h1>
 
               <p>At the time subforms of the <code class="relevant">cachef</code> place are evaluated:</p>
-              <ol>
+              <ol class="list">
                 <li>If <var>init-form-evaluates-to</var> is <code>:function</code>, <var>init-form</var> is evaluated to produce <var>init-form-function</var>.</li>
                 <li><var>test</var> is evaluated to produce <var>test-function</var>.</li>
               </ol>
               <p>At the time an attempt is made to read the value of the <code class="relevant">cachef</code> place:</p>
-              <ol>
+              <ol class="list">
                 <li><var>test-function</var> is called with the value of <var>cache-place</var>, producing <var>fullp</var>.</li>
                 <li>If <var>fullp</var> is generalized true, the value of <var>cache-place</var> that was read in step 1 is simply returned. Else, <var>cache-place</var> is assigned the result of evaluating the <var>init-form</var> and that value is returned.</li>
               </ol>
@@ -509,14 +509,14 @@ NIL
               </h1>
 
               <p>At the time subforms of the <code class="relevant">cachef</code> place are evaluated:</p>
-              <ol>
+              <ol class="list">
                 <li>The subforms of <var>cachedp-place</var> are evaluated.</li>
                 <li>The subforms of <var>cache-place</var> are evaluated.</li>
                 <li>If <var>init-form-evaluates-to</var> is <code class="relevant marker">:function</code>, <var>init-form</var> is evaluated to produce <var>init-form-function</var>.</li>
                 <li><var>test</var> and <var>new-cachedp</var> are evaluated in the order they appear.</li>
               </ol>
               <p>At the time an attempt is made to read the value of the <code class="relevant">cachef</code> place:</p>
-              <ol>
+              <ol class="list">
                 <li><var>test-function</var> is called with the value of <var>cachedp-place</var>, producing <var>fullp</var>.</li>
                 <li>If <var>fullp</var> is generalized true, The value of <var>cache-place</var> that was read in step 1 is simply returned. Else, <var>cache-place</var> is assigned the result of evaluating the <var>init-form</var> and that value is returned.</li>
               </ol>
